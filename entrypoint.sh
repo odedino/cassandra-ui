@@ -30,13 +30,21 @@ else
   CASSANDRA_PASSOWRD="${CASSANDRA_PASSOWRD}"
 fi
 
-dig +short $CASSANDRA_HOST
+for i in $(echo $CASSANDRA_HOST | sed "s/,/ /g")
+do
+    # call your procedure/other scripts here below
+    echo "address is $i"
+    dig +short $i
+    ips=$(dig +short $i)
+    echo "resolved ips: $ips"
+    single_line_ips=$(echo $ips)
+    echo "single_line ips: $single_line_ips"
+    CASSANDRA_HOST_IP=${single_line_ips// /,}
+    echo "CASSANDRA_HOST_IP : $CASSANDRA_HOST_IP"
+    a=$a,$CASSANDRA_HOST_IP
+done
 
-ips=$(dig +short $CASSANDRA_HOST)
-echo "resolved ips: $ips"
-single_line_ips=$(echo $ips)
-echo "single_line ips: $single_line_ips"
-CASSANDRA_HOST_IP=${single_line_ips// /,}
+CASSANDRA_HOST_IP=$(echo ${a:1})
 echo "CASSANDRA_HOST_IP : $CASSANDRA_HOST_IP"
 
 COMMAND="cassandra-web --hosts $CASSANDRA_HOST_IP --port $CASSANDRA_PORT --username $CASSANDRA_USERNAME --password $CASSANDRA_PASSOWRD"
